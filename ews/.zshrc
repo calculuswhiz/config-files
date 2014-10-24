@@ -20,8 +20,11 @@ alias ls='ls -FA --color=auto --group-directories-first'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 alias grep='grep --color=auto'
-alias zxconfig='emacs ~/.zshrc'
+alias zxconfig='emacs ~/.zshrc; . ~/.zshrc'
+alias vi='subl'
 alias malta='module load altera'
+alias -s pdf=evince
+alias -s txt=emacs
 
 key[Home]=${terminfo[khome]}
 

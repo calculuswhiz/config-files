@@ -1,0 +1,3 @@
+#compdef for xinit
+
+_arguments "1:GUI:(xfce4 i3)"

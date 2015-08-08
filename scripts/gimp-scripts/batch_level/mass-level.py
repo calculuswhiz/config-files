@@ -29,7 +29,7 @@ def python_fu_mass_level(img, low, high):
     for img in files:
         root,filename=os.path.split(img)
         name, ext = os.path.splitext(img)
-        new_name = name+'-levl.jpg'
+        new_name = name+'.jpg'
         new_dir  = os.path.join(root, 'levl')
         if not os.path.isdir(new_dir):
             os.makedirs(new_dir)

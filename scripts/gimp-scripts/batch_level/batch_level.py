@@ -6,8 +6,8 @@ import os
 import argparse
 
 parser = argparse.ArgumentParser(description="Apply level to a bunch of images in the current dir.")
-parser.add_argument('min', metavar='MIN', type=int,  help='Level input min.')
-parser.add_argument('max', metavar='MAX', type=int,  help='Level input max.')
+parser.add_argument('min', metavar='MIN', type=int,  help='Level input min. Cutoff at 0.')
+parser.add_argument('max', metavar='MAX', type=int,  help='Level input max. Cutoff at 255.')
 
 args = parser.parse_args()
 argList = vars(args)

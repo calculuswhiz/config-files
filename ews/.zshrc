@@ -10,7 +10,7 @@ zstyle ':completion:*' max-errors 2 not-numeric
 zstyle ':completion:*' menu select=0
 zstyle ':completion:*' prompt '%e'
 zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
-zstyle :compinstall filename '/home/zbian2/.zshrc'
+zstyle :compinstall filename '~/.zshrc'
 
 typeset -A key
 
@@ -91,4 +91,4 @@ autoload -U zmv
 
 #Variables/more setopts:
 setopt HIST_IGNORE_DUPS AUTO_PUSHD PUSHDIGNOREDUPS
-#export PATH=${PATH}:/home/zbian2/Desktop/st2/
+#export PATH=${PATH}:~/Desktop/st2/

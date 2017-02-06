@@ -24,4 +24,5 @@ As a side effect, this tool can also be used to batch flatten XCF images as `bat
 - Put `batch_level.py` into a directory that is covered by your `$PATH` environment variable. For example, on my computer, I use `~/bin/`.
 - To make this script executable, do `chmod +x batch_level.py`.
 - Put `mass-level.py` into your gimp plugins directory. On my system, it's `~/.gimp-2.8/plug-ins/`
+- `chmod +x` this as well.
 - That's all. Change directories to the one with all your scans, and try it out.

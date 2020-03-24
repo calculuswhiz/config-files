@@ -132,7 +132,7 @@ function Start-FSWatch()
     Register-ObjectEvent -InputObject $timer -EventName Elapsed -SourceIdentifier Tick -Action $OnTick -MessageData $passThru | Out-Null
 
     Write-Host "Now Watching: `"$Target`" for changes"
-    Write-Host "To cancel, run Unwatch-FileSystem"
+    Write-Host "To cancel, run Stop-FSWatch"
 }
 
 # Cancel the watch

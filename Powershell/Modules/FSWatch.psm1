@@ -71,7 +71,7 @@ function Start-FSWatch()
         if ($myArgs.StayAlive -ne $True)
         {
             Write-Host "Terminating watch"
-            Unwatch-FileSystem
+            Stop-FSWatch
         }
 
         if ($myArgs.Timeout -gt 0)

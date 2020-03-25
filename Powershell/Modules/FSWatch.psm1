@@ -1,9 +1,11 @@
+using namespace System.IO
+
 # Watch a target folder or file
 function Start-FSWatch()
 {
     param(
         [Parameter(Mandatory=$True)]$Target,
-            $Action={""},
+        $Action={""},
         [switch]$Silent=$False, 
         [switch]$StayAlive=$False,
         [int]$Timeout=0
@@ -28,15 +30,14 @@ function Start-FSWatch()
     }
 
     #Set up Watch
-    $FileSystemWatcher = [System.IO.FileSystemWatcher]
-    $NotifyFilters = [System.IO.NotifyFilters]
-    $watcher = $FileSystemWatcher::new()
+    $watcher = [FileSystemWatcher]::new()
     
     $isTargetDirectory = (Get-Item $Target) -is [System.IO.DirectoryInfo]
 
     if (-not $isTargetDirectory)
     {
         $watcher.Path = (Get-Item $Target).DirectoryName
+        $watcher.Filter = (Get-Item $Target).Name
     }    
     else
     {
@@ -52,29 +53,28 @@ function Start-FSWatch()
     $OnChanged = 
     {
         $myArgs = $event.MessageData
+        $params = $myArgs.Params
         $event = $event.SourceEventArgs
 
-        if ($myArgs.lock.Value -or 
-            -not ($myArgs.isTargetDirectory -or
-               (Get-Item $myArgs.Target).FullName -eq $event.FullPath))
+        if ($myArgs.lock.Value)
         {
             return
         }
 
-        if ($myArgs.Silent -ne $True)
+        if ($params.Silent -ne $True)
         {
             Write-Host $event.ChangeType ":" $event.FullPath
         }
 
-        [Scriptblock]::Create($myArgs.Action).Invoke()
+        [Scriptblock]::Create($params.Action).Invoke()
 
-        if ($myArgs.StayAlive -ne $True)
+        if ($params.StayAlive -ne $True)
         {
             Write-Host "Terminating watch"
             Stop-FSWatch
         }
 
-        if ($myArgs.Timeout -gt 0)
+        if ($params.Timeout -gt 0)
         {
             $myArgs.lock.Value = $True
             $myArgs.timer.Start()
@@ -84,6 +84,7 @@ function Start-FSWatch()
     $OnRenamed = 
     {
         $myArgs = $event.MessageData
+        $params = $myArgs.Params
         $event = $event.SourceEventArgs
 
         if ($myArgs.lock.Value)
@@ -91,20 +92,20 @@ function Start-FSWatch()
             return
         }
 
-        if ($myArgs.Silent -ne $True)
+        if ($params.Silent -ne $True)
         {
             Write-Host $event.ChangeType: $event.OldFullPath "->" $event.FullPath
         }
 
-        $([scriptblock]::Create($myArgs.Action)).Invoke()
+        $([Scriptblock]::Create($params.Action)).Invoke()
 
-        if ($myArgs.StayAlive -ne $True)
+        if ($params.StayAlive -ne $True)
         {
             Write-Host "Terminating watch"
-            Unwatch-FileSystem
+            Stop-FSWatch
         }
 
-        if ($myArgs.Timeout -gt 0)
+        if ($params.Timeout -gt 0)
         {
             $myArgs.lock.Value = $True
             $myArgs.timer.Start()
@@ -112,17 +113,29 @@ function Start-FSWatch()
     }
 
     #Register events
+    $params = @{}
+    foreach ($h in $MyInvocation.MyCommand.Parameters.GetEnumerator())
+    {
+        try
+        {
+            $key = $h.Key
+            $val = Get-Variable -Name $key -ErrorAction Stop | Select-Object -ExpandProperty Value -ErrorAction Stop
+            if ([string]::IsNullOrEmpty($val) -and (-not $PSBoundParameters.ContainsKey($key)))
+            {
+                throw "Error in key: $key"
+            }
+            $params[$key] = $val
+        }
+        catch
+        {}
+    }
+    
     $passThru = 
     @{
-        Target = $Target; 
-        Action = $Action; 
-        StayAlive = $StayAlive; 
-        Silent = $Silent; 
-        Timeout = $Timeout; 
-
+        Params = $params;
+        
         lock = $lock;
         timer = $timer;
-        isTargetDirectory = $isTargetDirectory;
     }
 
     Register-ObjectEvent -InputObject $watcher -EventName Changed -SourceIdentifier File.Changed -Action $OnChanged -MessageData $passThru | Out-Null
@@ -131,7 +144,7 @@ function Start-FSWatch()
     Register-ObjectEvent -InputObject $watcher -EventName Renamed -SourceIdentifier File.Renamed -Action $OnRenamed -MessageData $passThru | Out-Null
     Register-ObjectEvent -InputObject $timer -EventName Elapsed -SourceIdentifier Tick -Action $OnTick -MessageData $passThru | Out-Null
 
-    Write-Host "Now Watching: `"$Target`" for changes"
+    Write-Host "Now Watching: `"$($watcher.Path)`" for changes, filtered on $(watcher.Filter)"
     Write-Host "To cancel, run Stop-FSWatch"
 }
 
@@ -144,7 +157,7 @@ function Stop-FSWatch()
     Unregister-Event -SourceIdentifier File.Renamed
     Unregister-Event -SourceIdentifier Tick
 
-    Write-Host "Canceled FS Watch"
+    Write-Host "Canceled FSWatch"
 }
 
 Export-ModuleMember -Function Start-FSWatch, Stop-FSWatch

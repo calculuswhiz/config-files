@@ -144,7 +144,7 @@ function Start-FSWatch()
     Register-ObjectEvent -InputObject $watcher -EventName Renamed -SourceIdentifier File.Renamed -Action $OnRenamed -MessageData $passThru | Out-Null
     Register-ObjectEvent -InputObject $timer -EventName Elapsed -SourceIdentifier Tick -Action $OnTick -MessageData $passThru | Out-Null
 
-    Write-Host "Now Watching: `"$($watcher.Path)`" for changes, filtered on $(watcher.Filter)"
+    Write-Host "Now Watching: `"$($watcher.Path)`" for changes, filtered on $($watcher.Filter)"
     Write-Host "To cancel, run Stop-FSWatch"
 }
 
